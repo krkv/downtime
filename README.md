@@ -22,7 +22,7 @@ Program monitors website status with given interval.
 
 Downtime information is saved to log file.
 
-According to user configuration, email notification is sent:
+According to user configuration, email notifications are sent:
 
 1. When site goes down (contains HTTP error status)
 2. When site goes back up
