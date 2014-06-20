@@ -1,7 +1,7 @@
 downtime
 ========
 
-A simple Java program that tracks the website status.
+A simple Java program that tracks website status.
 
 Program works in command line mode.
 
