@@ -6,20 +6,15 @@ import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.sql.Timestamp;
+import java.util.*;
+
+import javax.mail.*;
+import javax.mail.internet.*;
 
 public class Main {
 	
 	static int downtime_counter = -1;
 	static Timestamp last_downtime;
-	
-	// website to check
-	static String site = "http://krrod.narod.ru/test.html";
-	
-	// check period in seconds
-	static int period = 1;
-	
-	// number of unsuccesful tries to send notification
-	static int notify_at = 10;
 	
 	// checks if the given website is up
 	public static boolean site_is_up(String u) {
@@ -37,6 +32,25 @@ public class Main {
 	};
 
 	public static void main(String[] args) {
+		
+		// Website to check
+		String site = args[0];
+		// Check interval in seconds
+		int interval = Integer.parseInt(args[1]);
+		// Number of unsuccesful checks before notifying
+		int notify_at = Integer.parseInt(args[2]);
+		// SMTP host
+		String host = args[3];
+		// SMTP login
+		String username = args[4];
+		// SMTP password
+		String password = args[5];
+		// Notification from
+		String from = args[6];
+		// Notification to
+		String to = args[7];
+		Properties props = new Properties();
+	    Session session = Session.getInstance(props);
 		
 		// create logfile if required
 		File log = new File("log.txt");
@@ -69,7 +83,24 @@ public class Main {
 				else if (downtime_counter == 500) System.out.println("The site is down for 500 tries.");
 				
 				if (downtime_counter == notify_at) {
-					// TODO Send notification that website is down. 
+					
+					// Send notification that website is down.
+					
+					try {
+						MimeMessage msg = new MimeMessage(session);
+					    msg.setFrom(new InternetAddress(from));
+				        msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
+				        msg.setSubject("Website " + site + " is down.");				        
+				        msg.setText("Oh no! Your website " + site + " is down! Time to fix it!");
+					    Transport t = session.getTransport("smtps");
+					    try {
+						t.connect(host, username, password);
+						t.sendMessage(msg, msg.getAllRecipients());
+					    } finally {
+						t.close();
+					    }
+					} catch (Exception e) {}
+					
 				}
 			
 			// the website is up
@@ -81,7 +112,7 @@ public class Main {
 					// add the last downtime to log file
 					try {
 						BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("log.txt", true)));
-						bw.write(last_downtime + " site was down for " + downtime_counter * period + " seconds");
+						bw.write(last_downtime + " site was down for " + downtime_counter * interval + " seconds");
 						bw.newLine();
 						bw.close();
 					} catch (IOException e) {
@@ -90,7 +121,25 @@ public class Main {
 					
 					// if the downtime notification has been sent
 					if (downtime_counter > notify_at) {
-						// TODO send notification that website is up again
+						
+						// send notification that website is up again
+						
+						try {
+							MimeMessage msg = new MimeMessage(session);
+						    msg.setFrom(new InternetAddress(from));
+					        msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
+					        msg.setSubject("Website " + site + " is up again.");				        
+					        msg.setText("Good news! Your website " + site + " is up again. "
+					        		+ "It has been down for " + downtime_counter * interval + " seconds.");
+						    Transport t = session.getTransport("smtps");
+						    try {
+							t.connect(host, username, password);
+							t.sendMessage(msg, msg.getAllRecipients());
+						    } finally {
+							t.close();
+						    }
+						} catch (Exception e) {}
+						
 					}
 					
 					// reset downtime counter
@@ -100,7 +149,7 @@ public class Main {
 				
 			// wait before performing next check			    
 			try {
-				Thread.sleep(period * 1000);
+				Thread.sleep(interval * 1000);
 			} catch(InterruptedException ex) {
 		    Thread.currentThread().interrupt();
 			}
