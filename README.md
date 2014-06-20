@@ -19,7 +19,9 @@ And configure email notifications with:
 4. Notification receiver email address
 
 Program monitors website status with given interval.
+
 Downtime information is saved to log file.
+
 According to user configuration, email notification is sent:
 
 1. When site goes down (contains HTTP error status)
