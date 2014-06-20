@@ -3,7 +3,7 @@ downtime
 
 A simple Java program that tracks the website downtime.
 
-Program works in console mode.
+Program works in command line mode.
 
 On startup user has to provide:
 
