@@ -138,7 +138,7 @@ public class Main {
 		while (true) {
 			
 			// the website is down
-			if (site_status(site) >= 300) {
+			if (site_status(site) >= 400) {
 				
 				System.out.println("Website error. Status: " + site_status(site));
 				
